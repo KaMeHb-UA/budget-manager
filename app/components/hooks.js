@@ -18,4 +18,5 @@ export default (
     'publish',
     'db_get',
     'db_add',
+    'db_update',
 );
