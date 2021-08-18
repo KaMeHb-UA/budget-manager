@@ -1,5 +1,5 @@
 import request from './jsonrpc.js';
-import { hooks } from './core.js';
+import hooks from './hooks.js';
 import { bold } from '../helpers/os/output.js';
 
 /**
@@ -18,6 +18,26 @@ function isRegisterResult(arg){
     return typeof arg === 'object' && arg !== null && typeof arg.name === 'string' && isStrArr(arg.hooks);
 }
 
+const dbHooksRegistered = {};
+
+export function isDBRegistered(){
+    let res = true;
+    for(const hook in dbHooksRegistered) res &&= dbHooksRegistered[hook];
+    return res;
+}
+
+function checkDBHooks(hook){
+    switch(hook){
+        case 'db_get':
+        case 'db_add':
+            if(dbHooksRegistered[hook]) return false;
+            dbHooksRegistered[hook] = true;
+            return true;
+        default:
+            return true;
+    }
+}
+
 /**
  * @arg {string} url
  */
@@ -26,12 +46,14 @@ export default async url => {
     if(!isRegisterResult(res)) throw new TypeError(`cannot register plugin ${url}: register method returned invalid value. Possible value is {name: string, hooks: string[]}`);
     const registeredHooks = [];
     for(const hook of res.hooks){
-        const regArr = hooks[hook];
-        if(regArr){
-            regArr.push([res.name, url]);
-            registeredHooks.push(hook);
-        }
-        else console.error(`[${bold(res.name)}]: warning: unknown hook ${hook}, skipping`);
+        if(checkDBHooks(hook)){
+            const regArr = hooks[hook];
+            if(regArr){
+                regArr.push([res.name, url]);
+                registeredHooks.push(hook);
+            }
+            else console.error(`[${bold(res.name)}]: warning: unknown hook ${hook}, skipping`);
+        } else console.error(`[${bold(res.name)}]: warning: cannot register hook ${hook}: there may be only one such hook registered, skipping`);
     }
     return { name: res.name, hooks: registeredHooks };
 }
