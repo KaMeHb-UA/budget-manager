@@ -1,0 +1,12 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "start": "node app/index.js"
+    },
+    "devDependencies": {
+        "@types/node": "^16.6.1"
+    },
+    "dependencies": {
+    }
+}
