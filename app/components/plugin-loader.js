@@ -38,12 +38,17 @@ function checkDBHooks(hook){
     }
 }
 
+/** @type {string[]} */
+const registered = [];
+
 /**
  * @arg {string} url
  */
 export default async url => {
     const res = await request(url, 'register');
-    if(!isRegisterResult(res)) throw new TypeError(`cannot register plugin ${url}: register method returned invalid value. Possible value is {name: string, hooks: string[]}`);
+    if(!isRegisterResult(res)) throw new TypeError(`Cannot register plugin ${url}: register method returned invalid value. Possible value is {name: string, hooks: string[]}`);
+    if(registered.includes(res.name)) throw new TypeError(`Cannot register plugin ${url}: name ${res.name} is taken by another plugin`);
+    registered.push(res.name);
     const registeredHooks = [];
     for(const hook of res.hooks){
         if(checkDBHooks(hook)){
