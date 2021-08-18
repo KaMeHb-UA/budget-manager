@@ -1,6 +1,5 @@
 import callHooks from './hooks.js';
 
-
 /**
  * @arg {`db_${'get' | 'add' | 'update'}`} hook
  * @arg {any} data
