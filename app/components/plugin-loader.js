@@ -18,7 +18,11 @@ function isRegisterResult(arg){
     return typeof arg === 'object' && arg !== null && typeof arg.name === 'string' && isStrArr(arg.hooks);
 }
 
-const dbHooksRegistered = {};
+const dbHooksRegistered = {
+    db_get: false,
+    db_add: false,
+    db_update: false,
+};
 
 export function isDBRegistered(){
     let res = true;
@@ -30,6 +34,7 @@ function checkDBHooks(hook){
     switch(hook){
         case 'db_get':
         case 'db_add':
+        case 'db_update':
             if(dbHooksRegistered[hook]) return false;
             dbHooksRegistered[hook] = true;
             return true;
