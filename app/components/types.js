@@ -54,3 +54,12 @@ export function isTx(data){
         && assume(data, ['provider', 'description', 'id', 'currency'], 'string')
         && assume(data, ['amount', 'time', 'comission', 'cashback', 'restBalance'], 'number')
 }
+
+/**
+ * @arg {any} data
+ * @return {data is { id: string, data: any }[]}
+ */
+export function isDbGetResp(data){
+    return Array.isArray(data)
+        && data.reduce((correct, data) => correct && isObj(data) && typeof data.id === 'string', true)
+}
