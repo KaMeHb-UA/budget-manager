@@ -12,11 +12,12 @@ async function call(hook, data){
 }
 
 /**
+ * @arg {string} table
  * @arg {any} options
  * @return {Promise<{provider: string, data: {id: string, data: any}[]} | {provider: string, error: string}>}
  */
-export async function get(options){
-    const [ data, provider ] = await call('db_get', options);
+export async function get(table, options){
+    const [ data, provider ] = await call('db_get', { table, options });
     if(!isDbGetResp(data)) return {
         provider,
         error: 'db_get returned response in unknown format',
