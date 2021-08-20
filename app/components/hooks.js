@@ -24,6 +24,11 @@ const hooks = (
     'db_update',
 );
 
+export function register(hook, name, url){
+    if(!(hook in hooks)) throw new Error('cannot find hook ' + hook);
+    hooks[hook].push([name, url]);
+}
+
 /**
  * @arg {keyof hooks} name
  * @arg {any} args
