@@ -15,6 +15,6 @@ export default (cb, ms, ...args) => {
             await cb(...args);
             await sleep(ms);
         }
-    }
+    }()
     return () => { next = false };
 }
