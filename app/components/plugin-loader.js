@@ -1,5 +1,5 @@
 import request from './jsonrpc.js';
-import hooks from './hooks.js';
+import { register } from './hooks.js';
 import { bold } from '../helpers/os/output.js';
 
 /**
@@ -56,14 +56,14 @@ export default async url => {
     registered.push(res.name);
     const registeredHooks = [];
     for(const hook of res.hooks){
-        if(checkDBHooks(hook)){
-            const regArr = hooks[hook];
-            if(regArr){
-                regArr.push([res.name, url]);
-                registeredHooks.push(hook);
-            }
-            else console.error(`[${bold(res.name)}]: warning: unknown hook ${hook}, skipping`);
-        } else console.error(`[${bold(res.name)}]: warning: cannot register hook ${hook}: there may be only one such hook registered, skipping`);
+        if(checkDBHooks(hook)) try{
+            register(hook, res.name, url);
+            registeredHooks.push(hook);
+        } catch(e){
+            console.error(`[${bold(res.name)}]: warning: unknown hook ${hook}, skipping`);
+        } else {
+            console.error(`[${bold(res.name)}]: warning: cannot register hook ${hook}: there may be only one such hook registered, skipping`);
+        }
     }
     return { name: res.name, hooks: registeredHooks };
 }
