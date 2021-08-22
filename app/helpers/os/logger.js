@@ -1,5 +1,5 @@
 import { stdout, stderr } from 'process';
-import { bold, red } from './output';
+import { bold, red } from './output.js';
 
 export default new class{
     /**
