@@ -97,6 +97,11 @@ async function getNewTxs(provider, providerTxs, changes){
                     '=',
                     change.accountId,
                 ],
+                [
+                    'id',
+                    '!=',
+                    '',
+                ],
             ],
         });
         if('error' in dbTxs){
