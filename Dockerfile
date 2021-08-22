@@ -1,11 +1,13 @@
 FROM node:16-alpine
 
-COPY app /app/src
-COPY package.json /app/package.json
-COPY yarn.lock /app/yarn.lock
+COPY app /app
+COPY package.json /package.json
+COPY yarn.lock /yarn.lock
 
-WORKDIR /app
+WORKDIR /
 
-RUN yarn --prod
+RUN apk add --no-cache git && \
+    yarn --prod && \
+    apk del --no-cache git
 
-ENTRYPOINT [ "node", "/app/src/app.js" ]
+ENTRYPOINT [ "node", "/app/index.js" ]
