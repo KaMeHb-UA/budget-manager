@@ -18,6 +18,7 @@ const hookDB = (
     'balance',
     'transactions',
     'currencies_rate',
+    'currency_info',
     'publish',
     'db_get',
     'db_add',
