@@ -1,11 +1,10 @@
 /**
- * @typedef BalanceData
+ * @typedef Balances
  * @property {string} provider
- * @property {{[x: string]: number}} balances
+ * @property {{type: 'personal' | 'business', amount: number, currency: string, id: string}[]} balances
  */
 /**
  * @typedef Tx
- * @property {string} provider
  * @property {number} amount
  * @property {string} description
  * @property {number} time
@@ -14,6 +13,8 @@
  * @property {number} cashback
  * @property {number} restBalance
  * @property {string} currency
+ * @property {number} mcc
+ * @property {string} accountId
  */
 
 /**
@@ -36,13 +37,25 @@ export function isObj(data){
 
 /**
  * @arg {any} data
- * @return {data is BalanceData}
+ * @return {data is Balances['balances'][0]}
  */
 export function isBalanceData(data){
     return isObj(data)
+        && typeof data.amount === 'number'
+        && ['personal', 'business'].includes(data.type)
+        && typeof data.currency === 'string'
+        && typeof data.id === 'string'
+}
+
+/**
+ * @arg {any} data
+ * @return {data is Balances}
+ */
+export function isBalances(data){
+    return isObj(data)
         && typeof data.provider === 'string'
-        && isObj(data.balances)
-        && Object.keys(data.balances).reduce((acc, i) => acc && typeof data.balances[i] === 'number', true)
+        && Array.isArray(data.balances)
+        && data.balances.map(isBalanceData).indexOf(false) === -1
 }
 
 /**
