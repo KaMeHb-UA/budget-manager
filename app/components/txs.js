@@ -175,5 +175,6 @@ export default async function(){
         const txs = await getNewTxs(provider, providerTxs[provider], changes.filter(v => v.provider === provider));
         return txs.map(tx => Object.assign(tx, { provider }));
     }))) for(const tx of txs) newTxs.push(tx);
+    if(newTxs.length) logger.log(null, `found ${newTxs.length} new transactions`);
     return newTxs;
 }
