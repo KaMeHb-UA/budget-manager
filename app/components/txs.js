@@ -156,7 +156,7 @@ export default async function(){
         }
         const savedBalances = dbBalances.data.filter(({data}) => data?.provider === provider)[0];
         if(savedBalances && !isBalances(savedBalances.data)){
-            logger.error(provider, `balance data for provider '${provider}' returned in unknown format`);
+            logger.error(dbBalances.provider, `balance data for provider '${provider}' returned in unknown format`);
             continue;
         }
         const currentBalances = balancesToCheck.balances;
