@@ -1,7 +1,7 @@
 import { bold } from '../helpers/os/output.js';
 import request from './jsonrpc.js';
 
-const hooks = (
+const hookDB = (
     /**
      * @template {string} T
      * @param  {...T} hooks
@@ -24,19 +24,21 @@ const hooks = (
     'db_update',
 );
 
+export const hooks = Object.keys(hookDB);
+
 export function register(hook, name, url){
-    if(!(hook in hooks)) throw new Error('cannot find hook ' + hook);
-    hooks[hook].push([name, url]);
+    if(!(hook in hookDB)) throw new Error('cannot find hook ' + hook);
+    hookDB[hook].push([name, url]);
 }
 
 /**
- * @arg {keyof hooks} name
+ * @arg {keyof hookDB} name
  * @arg {any} args
  * @return {Promise<{[x: string]: any}>}
  */
 export default async function(name, args){
     const res = {};
-    for(const [ plugin, result ] of await Promise.all(hooks[name].map(async ([plugin, url]) => {
+    for(const [ plugin, result ] of await Promise.all(hookDB[name].map(async ([plugin, url]) => {
         try{
             return [plugin, await request(url, name, args)];
         } catch(e){
