@@ -16,7 +16,7 @@ function digitsAfterDot(num){
  */
 function baseOp(op1, op2, cb){
     const dad1 = digitsAfterDot(op1), dad2 = digitsAfterDot(op2);
-    const targetPrecision = 10 ** dad1 > dad2 ? dad1 : dad2;
+    const targetPrecision = 10 ** (dad1 > dad2 ? dad1 : dad2);
     return cb(op1 * targetPrecision, op2 * targetPrecision, targetPrecision) / targetPrecision;
 }
 
