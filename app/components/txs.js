@@ -1,7 +1,7 @@
 import { get } from './db.js';
 import callHooks from './hooks.js';
 import { minus, plus } from '../helpers/os/math.js';
-import { isBalances, isTx } from './types';
+import { isBalances, isTx } from './types.js';
 import logger from '../helpers/os/logger.js';
 
 /** @typedef {import('./types').Tx} Tx */
