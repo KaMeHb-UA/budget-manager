@@ -25,7 +25,7 @@ function isTxArr(data){
 }
 
 /** @arg {Tx[]} txs */
-function fillTxGaps(txs){
+function fillTxGaps(txs, provider){
     const res = [];
     const splitted = splitTxsByAcc(txs);
     for(const acc in splitted){
@@ -34,18 +34,22 @@ function fillTxGaps(txs){
         for(let i = 1; i < txs.length; i++){
             const diff = minus(txs[i].restBalance, txs[i - 1].restBalance);
             const hiddenDiff = minus(txs[i].amount, diff);
-            if(hiddenDiff) res.push({
-                amount: hiddenDiff,
-                description: '<hidden_tx>',
-                time: -1,
-                id: '',
-                comission: 0,
-                cashback: 0,
-                restBalance: plus(txs[i - 1].restBalance, hiddenDiff),
-                currency: txs[i].currency || txs[i - 1].currency,
-                mcc: 0,
-                accountId: acc,
-            });
+            if(hiddenDiff){
+                const currency = txs[i].currency || txs[i - 1].currency;
+                logger.warn(provider, `found hidden tx with amount of ${hiddenDiff} ${currency}`);
+                res.push({
+                    amount: hiddenDiff,
+                    description: '<hidden_tx>',
+                    time: -1,
+                    id: '',
+                    comission: 0,
+                    cashback: 0,
+                    restBalance: plus(txs[i - 1].restBalance, hiddenDiff),
+                    currency,
+                    mcc: 0,
+                    accountId: acc,
+                });
+            }
             res.push(txs[i]);
         }
     }
@@ -124,7 +128,7 @@ async function getNewTxs(provider, providerTxs, changes){
         ))
     }
     // @ts-ignore
-    return fillTxGaps([...lastSavedTxs, ...newTxs, ...lastBalanceTxs]).filter(tx => !tx.__special);
+    return fillTxGaps([...lastSavedTxs, ...newTxs, ...lastBalanceTxs], provider).filter(tx => !tx.__special);
 }
 
 export default async function(){
