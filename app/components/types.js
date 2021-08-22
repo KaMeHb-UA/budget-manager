@@ -64,8 +64,8 @@ export function isBalances(data){
  */
 export function isTx(data){
     return isObj(data)
-        && assume(data, ['provider', 'description', 'id', 'currency'], 'string')
-        && assume(data, ['amount', 'time', 'comission', 'cashback', 'restBalance'], 'number')
+        && assume(data, ['description', 'id', 'currency', 'accountId'], 'string')
+        && assume(data, ['amount', 'time', 'comission', 'cashback', 'restBalance', 'mcc'], 'number')
 }
 
 /**
