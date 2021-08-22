@@ -39,4 +39,6 @@ jobs:
           platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
           file: Dockerfile
           push: true
-          tags: kamehb/budget-manager:${{ fromJSON(steps.tag.outputs.result) }}
+          tags: |
+            kamehb/budget-manager:${{ fromJSON(steps.tag.outputs.result) }}
+            kamehb/budget-manager:latest
