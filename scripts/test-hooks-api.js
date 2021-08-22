@@ -7,7 +7,12 @@ const url = argv[2],
 
 const tests = {
     async balance(){
-        const balances = await jsonrpc(url, 'balance');
+        let balances;
+        try{
+            balances = await jsonrpc(url, 'balance');
+        } catch(e){
+            console.error(e);
+        }
         console.error(balances);
         if(!isBalances({
             provider: 'test-provider',
@@ -15,7 +20,12 @@ const tests = {
         })) throw new Error;
     },
     async transactions(){
-        const txs = await jsonrpc(url, 'transactions');
+        let txs;
+        try{
+            txs = await jsonrpc(url, 'transactions');
+        } catch(e){
+            console.error(e);
+        }
         console.error(txs);
         if(!Array.isArray(txs) || txs.map(isTx).includes(false)) throw new Error;
     },
