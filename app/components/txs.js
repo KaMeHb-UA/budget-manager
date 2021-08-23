@@ -1,4 +1,4 @@
-import { get } from './db.js';
+import { add, get, update } from './db.js';
 import callHooks from './hooks.js';
 import { minus, plus } from '../helpers/os/math.js';
 import { isBalances, isTx } from './types.js';
@@ -13,7 +13,6 @@ import logger from '../helpers/os/logger.js';
  * @property {string} currency
  * @property {number} amount
  * @property {string} accountId
- * @property {string} savedId
  */
 
 /**
@@ -145,6 +144,7 @@ export default async function(){
     }
     /** @type {Change[]} */
     const changes = [];
+    const balancesToSave = [];
     for(const provider in providerBalances){
         const balancesToCheck = {
             provider,
@@ -154,25 +154,37 @@ export default async function(){
             logger.error(provider, 'balance data returned in unknown format');
             continue;
         }
-        const savedBalances = dbBalances.data.filter(({data}) => data?.provider === provider)[0];
+        const savedBalances = dbBalances.data.filter(({ data }) => data?.provider === provider)[0];
         if(savedBalances && !isBalances(savedBalances.data)){
             logger.error(dbBalances.provider, `balance data for provider '${provider}' returned in unknown format`);
             continue;
         }
         const currentBalances = balancesToCheck.balances;
         for(const currentBalance of currentBalances){
-            const savedBalance = savedBalances?.data?.balances?.[currentBalance.id]?.amount || 0;
+            const savedBalance = savedBalances?.data?.balances?.filter(({ id }) => currentBalance.id === id)?.[0]?.amount || 0;
             if(currentBalance.amount === savedBalance) continue;
             changes.push({
                 provider,
                 currency: currentBalance.currency,
                 amount: minus(currentBalance.amount, savedBalance),
                 accountId: currentBalance.id,
-                savedId: savedBalances?.id,
             });
         }
+        balancesToSave.push({
+            balances: currentBalances,
+            provider,
+            id: savedBalances?.id,
+        });
     }
     if(!changes.length) return [];
+    await Promise.all(balancesToSave.map(async ({ balances, provider, id }) => {
+        const data = {
+            provider,
+            balances,
+        };
+        if(id) await update('balances', id, data);
+        else await add('balances', data);
+    }));
     const providerTxs = await callHooks('transactions');
     const newTxs = [];
     for(const txs of await Promise.all(Object.keys(providerTxs).map(async provider => {
