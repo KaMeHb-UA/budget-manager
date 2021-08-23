@@ -13,6 +13,7 @@ import logger from '../helpers/os/logger.js';
  * @property {string} currency
  * @property {number} amount
  * @property {string} accountId
+ * @property {number} restBalance
  */
 
 /**
@@ -32,7 +33,7 @@ function fillTxGaps(txs, provider){
         res.push(txs[0]);
         for(let i = 1; i < txs.length; i++){
             const diff = minus(txs[i].restBalance, txs[i - 1].restBalance);
-            const hiddenDiff = minus(txs[i].amount, diff);
+            const hiddenDiff = minus(diff, txs[i].amount);
             if(hiddenDiff){
                 const currency = txs[i].currency || txs[i - 1].currency;
                 logger.warn(provider, `found hidden tx with amount of ${hiddenDiff} ${currency}`);
@@ -82,7 +83,7 @@ async function getNewTxs(provider, providerTxs, changes){
     await Promise.all(changes.map(async change => {
         lastBalanceTxs.push({
             amount: 0,
-            restBalance: change.amount,
+            restBalance: change.restBalance,
             accountId: change.accountId,
             __special: true,
         });
@@ -162,12 +163,12 @@ export default async function(){
         const currentBalances = balancesToCheck.balances;
         for(const currentBalance of currentBalances){
             const savedBalance = savedBalances?.data?.balances?.filter(({ id }) => currentBalance.id === id)?.[0]?.amount || 0;
-            if(currentBalance.amount === savedBalance) continue;
             changes.push({
                 provider,
                 currency: currentBalance.currency,
                 amount: minus(currentBalance.amount, savedBalance),
                 accountId: currentBalance.id,
+                restBalance: currentBalance.amount,
             });
         }
         balancesToSave.push({
@@ -176,7 +177,6 @@ export default async function(){
             id: savedBalances?.id,
         });
     }
-    if(!changes.length) return [];
     await Promise.all(balancesToSave.map(async ({ balances, provider, id }) => {
         const data = {
             provider,
