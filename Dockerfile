@@ -6,8 +6,6 @@ COPY yarn.lock /yarn.lock
 
 WORKDIR /
 
-RUN apk add --no-cache git && \
-    yarn --prod && \
-    apk del --no-cache git
+RUN yarn --prod
 
 ENTRYPOINT [ "node", "/app/index.js" ]
