@@ -87,32 +87,59 @@ async function getNewTxs(provider, providerTxs, changes){
             accountId: change.accountId,
             __special: true,
         });
-        const dbTxs = await get('transactions', {
-            reverse: true,
-            limit: 1,
-            filters: [
-                [
-                    'provider',
-                    '=',
-                    provider,
+        const [ dbTxRes, savedBalanceTxRes ] = await Promise.all([
+            get('transactions', {
+                reverse: true,
+                limit: 1,
+                filters: [
+                    [
+                        'provider',
+                        '=',
+                        provider,
+                    ],
+                    [
+                        'accountId',
+                        '=',
+                        change.accountId,
+                    ],
+                    // exclude hidden txs
+                    [
+                        'id',
+                        '!=',
+                        '',
+                    ],
                 ],
-                [
-                    'accountId',
-                    '=',
-                    change.accountId,
+            }),
+            get('transactions', {
+                reverse: true,
+                limit: 1,
+                filters: [
+                    [
+                        'provider',
+                        '=',
+                        provider,
+                    ],
+                    [
+                        'accountId',
+                        '=',
+                        change.accountId,
+                    ],
                 ],
-                [
-                    'id',
-                    '!=',
-                    '',
-                ],
-            ],
-        });
-        if('error' in dbTxs){
-            logger.error(dbTxs.provider, dbTxs.error);
+            }),
+        ]);
+        if('error' in dbTxRes){
+            logger.error(dbTxRes.provider, dbTxRes.error);
             return [];
         }
-        const tx = dbTxs.data[0]?.data;
+        if('error' in savedBalanceTxRes){
+            logger.error(savedBalanceTxRes.provider, savedBalanceTxRes.error);
+            return [];
+        }
+        const lastSavedBalanceTx = savedBalanceTxRes.data[0];
+        if(lastSavedBalanceTx && lastSavedBalanceTx.data.id !== dbTxRes.data[0]?.data?.id){
+            lastBalanceTxs.unshift(Object.assign({}, lastSavedBalanceTx.data, { __special: true }));
+        }
+        const tx = dbTxRes.data[0]?.data;
         if(tx) lastSavedTxs.push(Object.assign(tx, { __special: true }));
     }));
     const providerTxsByAcc = splitTxsByAcc(providerTxs);
