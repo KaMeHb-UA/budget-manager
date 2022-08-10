@@ -17,6 +17,13 @@ export class TasksService {
 		return (Object.values(Events) as string[]).includes(scope);
 	}
 
+	private sendEvent(event: Events, data: any) {
+		if (!(event in this.subscribeMap)) return;
+		for (const subject of this.subscribeMap[event]) {
+			subject.next({ event, data });
+		}
+	}
+
 	subscribe(name: string, scopes: string[]): Observable<any> {
 		const subjects: Subject<any>[] = [];
 		const { subscribeMap } = this;
@@ -47,9 +54,6 @@ export class TasksService {
 	}
 
 	sendNotify(text: string) {
-		if (!(Events.sendNotify in this.subscribeMap)) return;
-		for (const subject of this.subscribeMap[Events.sendNotify]) {
-			subject.next(text);
-		}
+		this.sendEvent(Events.sendNotify, text);
 	}
 }
